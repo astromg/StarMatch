@@ -1,2 +1,2 @@
-# COOTRANS
-Astrometric coordinates transformation (for reduced FITS)
+# StarMatch
+Coordinates matching for reduced FITS files
