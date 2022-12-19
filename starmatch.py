@@ -1,55 +1,44 @@
 #!/usr/bin/env python3
 import sys
 import numpy as np
+from starmatch_lib import *
 from FitsView_gui import *
 from PyQt5.QtWidgets import QApplication
 
-file_name_1=sys.argv[1]
-file_name_2=sys.argv[2]
+import matplotlib.pyplot as plt
 
-x_ref=[]
-y_ref=[]
-m_ref=[]
-
-with open(file_name_1, 'r') as plik:
-   i=0
-   for line in plik:
-      if i>2 and len(line.split())>1: 
-         x_ref.append(float(line.split()[1]))
-         y_ref.append(float(line.split()[2]))
-         m_ref.append(float(line.split()[3]))
-      i=i+1
+scale=sys.argv[1]    # scale = size file to size reference: sofi=ref; scale hawki/sofi = 7.5/5
+file_name_1=sys.argv[2]
+file_name_2=sys.argv[3]
 
 
-x_file=[]
-y_file=[]
-m_file=[]
+if ".ap" in file_name_1:
+   dane=loadap(file_name_1)
+elif ".out" in file_name_1:
+   dane=loadout(file_name_1)
+else: dane=load_file(0,file_name_1)   
 
-with open(file_name_2, 'r') as plik:
-   i=0
-   for line in plik:
-      if i>2 and len(line.split())>1: 
-         x_file.append(float(line.split()[1]))
-         y_file.append(float(line.split()[2]))
-         m_file.append(float(line.split()[3]))
-      i=i+1
+x_ref=dane[1]
+y_ref=dane[2]
+m_ref=dane[3]
 
+if ".ap" in file_name_2:
+   dane=loadap(file_name_2)
+elif ".out" in file_name_2:
+   dane=loadout(file_name_2)
+else: dane=load_file(0,file_name_2)   
 
-m_ref,x_ref,y_ref = zip(*sorted(zip(m_ref, x_ref, y_ref)))  
-m_file,x_file,y_file = zip(*sorted(zip(m_file, x_file, y_file))) 
+x_file=dane[1]
+y_file=dane[2]
+m_file=dane[3]
 
-x_ref=np.array(x_ref)
-y_ref=np.array(y_ref)
-m_ref=np.array(m_ref)
+dist = StarMatch(x_ref,y_ref,m_ref,x_file,y_file,m_file,scale)
 
-x_file=np.array(x_file)
-y_file=np.array(y_file)
-m_file=np.array(m_file)
-
-
+plt.hist(dist,1000)
+plt.show()
 
 
-
+'''
 app = QApplication(sys.argv)
 cfg=[] 
 FV_window1 = FitsView(cfg) # run the Pymage Widget class 
@@ -71,3 +60,4 @@ FV_window2.show()
 FV_window1.update() 
 
 sys.exit(app.exec_())
+'''
