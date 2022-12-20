@@ -32,10 +32,17 @@ x_file=dane[1]
 y_file=dane[2]
 m_file=dane[3]
 
-dist = StarMatch(x_ref,y_ref,m_ref,x_file,y_file,m_file,scale)
 
-plt.hist(dist,1000)
-plt.show()
+sm=StarMatch()
+sm.ref_xr=x_ref
+sm.ref_yr=y_ref
+sm.ref_mr=m_ref
+sm.go()
+
+#dist = CountDist(x_ref,y_ref)
+
+#plt.hist(dist,1000)
+#plt.show()
 
 
 '''

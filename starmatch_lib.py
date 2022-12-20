@@ -3,19 +3,26 @@ import sys
 import numpy 
 
 
-def StarMatch(xr,yr,mr,xf,yf,rf,scale):
-    dist=[]
-    print(len(xr))
-    xr=numpy.array(xr).astype(numpy.float)
-    yr=numpy.array(yr).astype(numpy.float)
-    for i,tmp in enumerate(xr):
-        x=xr[i]
-        y=yr[i]
-        numpy.delete(xr,i)
-        numpy.delete(yr,i)
-        d=((x-xr)**2+(y-yr)**2)**0.5
-        dist.extend(d)
-    return(dist)  
+
+
+class StarMatch():
+  def __init__(self):
+    self.nb_use=200
+    self.nb_match=50
+    self.scale=1
+    self.ref_xr=[]
+    self.ref_yr=[]
+    self.ref_mr=[]
+    self.field_xr=[]
+    self.field_yr=[]
+    self.field_mr=[]
+
+  def go(self):
+    self.ref_mr,self.ref_xr,self.ref_yr=zip(*sorted(zip(self.ref_mr,self.ref_xr,self.ref_yr)))
+    self.field_mr,self.field_xr,self.field_yr=zip(*sorted(zip(self.field_mr,self.field_xr,self.field_yr)))
+
+
+
         
 
 
@@ -70,5 +77,16 @@ def loadout(file):
     return dane	 
 
 
-
+def CountDist(xr,yr):
+    dist=[]
+    xr=numpy.array(xr).astype(numpy.float)
+    yr=numpy.array(yr).astype(numpy.float)
+    for i,tmp in enumerate(xr):
+        x=xr[i]
+        y=yr[i]
+        numpy.delete(xr,i)
+        numpy.delete(yr,i)
+        d=((x-xr)**2+(y-yr)**2)**0.5
+        dist.extend(d)
+    return(dist)  
 
