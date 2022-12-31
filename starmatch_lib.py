@@ -10,7 +10,7 @@ class StarMatch():
     self.nb_use=200                   # tyle gwiazd do brania pod uwage w liczeniu indeksu geometrycznego
     self.nbPCent_match=0.25           # dla tylu gwiazd (procentowo) zostanie porownany indeks geometryczny
     self.pixscale="auto"
-    self.nbStarsRadius=10              # liczba gwiazd w promieniu porownania
+    self.nbStarsRadius=5              # liczba gwiazd w promieniu porownania
     self.scale=1
     self.ref_xr=[]
     self.ref_yr=[]
@@ -124,10 +124,16 @@ class StarMatch():
         self.ref_ind_x=self.ref_x[maska]
         self.ref_ind_y=self.ref_y[maska]
         self.ref_ind_m=self.ref_m[maska]
-
-        direction = [(1,1),(1,0),(1,-1),(0,-1)]
-        k = find_projection(self.ref_star_x[i]-self.ref_ind_x,self.ref_star_y[i]-self.ref_ind_y)
         
+        #print(self.ref_ind_m)
+        #direction = [(1,1),(1,0),(1,-1),(0,-1)]
+        xx0=self.ref_star_x[i]-self.ref_ind_x[0]
+        yy0=self.ref_star_y[i]-self.ref_ind_y[0]
+        rr=(xx0**2+yy0**2)**0.5
+        xx0=xx0/rr
+        yy0=yy0/rr
+        direction = [(xx0,yy0),(-1*yy0,xx0)]
+        k = find_projection(self.ref_star_x[i]-self.ref_ind_x,self.ref_star_y[i]-self.ref_ind_y,direction,rr)
         
         print(k)
 
@@ -190,10 +196,8 @@ def loadap(file):
 
 #---------------------------------------------------------------
 
-def find_projection(x,y):
-    # 4 direction because abs()
-    direction = [(1,1),(1,0),(1,-1),(0,-1)]
-    return numpy.array([abs(i[0]*x + i[1]*y) for i in direction])
+def find_projection(x,y,direction,r):
+    return numpy.array([(i[0]*x + i[1]*y)/r for i in direction])
 
 #wczytuje plik .out 
 #dane=loadout(smc01.out)
