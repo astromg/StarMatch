@@ -42,8 +42,13 @@ sm.field_xr=x_file
 sm.field_yr=y_file
 sm.field_mr=m_file
 
-
 sm.go()
+
+xx1=sm.ref_match_x
+yy1=sm.ref_match_y
+
+xx2=sm.field_match_x
+yy2=sm.field_match_y
 
 #dist = CountDist(x_ref,y_ref)
 
@@ -51,26 +56,23 @@ sm.go()
 #plt.show()
 
 
-'''
+
 app = QApplication(sys.argv)
 cfg=[] 
 FV_window1 = FitsView(cfg) # run the Pymage Widget class 
-FV_window1.fname="SMC24_131127_1_K.fits" # define FITS file name 
+FV_window1.fname=file_name_1.split(".")[0]+".fits" # define FITS file name 
 FV_window1.newFits() # execute new fits 
-FV_window1.ext_x=[x_ref[wa],x_ref[wb],x_ref[wc]] 
-FV_window1.ext_y=[y_ref[wa],y_ref[wb],y_ref[wc]] 
-FV_window1.ext_l=["raz","dwa","trzy"] 
+FV_window1.ext_x=[xx1] 
+FV_window1.ext_y=[yy1] 
 FV_window1.show() 
 FV_window1.update() 
 
 FV_window2 = FitsView(cfg) # run the Pymage Widget class 
-FV_window2.fname="SMC24_181228_1_K.fits" # define FITS file name 
+FV_window2.fname=file_name_2.split(".")[0]+".fits" # define FITS file name 
 FV_window2.newFits() # execute new fits 
-FV_window2.ext_x=[x_file[t1],x_file[t2],x_file[i_tmp[n]]] 
-FV_window2.ext_y=[y_file[t1],y_file[t2],y_file[i_tmp[n]]] 
-FV_window2.ext_l=["raz","dwa","trzy"] 
+FV_window2.ext_x=[xx2] 
+FV_window2.ext_y=[yy2] 
 FV_window2.show() 
-FV_window1.update() 
+FV_window2.update() 
 
 sys.exit(app.exec_())
-'''

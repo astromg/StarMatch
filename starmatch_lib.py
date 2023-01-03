@@ -7,10 +7,10 @@ import numpy
 
 class StarMatch():
   def __init__(self):
-    self.nb_use=200                   # tyle gwiazd do brania pod uwage w liczeniu indeksu geometrycznego
+    self.nb_use=500                   # tyle gwiazd do brania pod uwage w liczeniu indeksu geometrycznego
     self.nbPCent_match=0.25           # dla tylu gwiazd (procentowo) zostanie porownany indeks geometryczny
     self.pixscale="auto"
-    self.nbStarsRadius=5              # liczba gwiazd w promieniu porownania
+    self.nbStarsRadius=10              # liczba gwiazd w promieniu porownania
     self.scale=1
     self.ref_xr=[]
     self.ref_yr=[]
@@ -99,21 +99,8 @@ class StarMatch():
 
     print("liczba gwiazd do indeksowania: ",len(self.ref_star_m),len(self.field_star_m))
 
-    self.ref_ind_N=[]
-    self.ref_ind_W=[]
 
-    self.ref_ind_x=[]
-    self.ref_ind_y=[]
-    self.ref_ind_m=[]
-
-
-    self.field_ind_N=[]
-    self.field_ind_W=[]
-
-    self.field_ind_x=[]
-    self.field_ind_y=[]
-    self.field_ind_m=[]
-
+    self.ref_star_K=[]
 
     for i,tmp in enumerate(self.ref_star_m):
         dist=(self.ref_star_x[i]-self.ref_x)**2+(self.ref_star_y[i]-self.ref_y)**2
@@ -125,21 +112,23 @@ class StarMatch():
         self.ref_ind_y=self.ref_y[maska]
         self.ref_ind_m=self.ref_m[maska]
         
-        #print(self.ref_ind_m)
-        #direction = [(1,1),(1,0),(1,-1),(0,-1)]
-        xx0=self.ref_star_x[i]-self.ref_ind_x[0]
-        yy0=self.ref_star_y[i]-self.ref_ind_y[0]
-        rr=(xx0**2+yy0**2)**0.5
-        xx0=xx0/rr
-        yy0=yy0/rr
-        direction = [(xx0,yy0),(-1*yy0,xx0)]
-        k = find_projection(self.ref_star_x[i]-self.ref_ind_x,self.ref_star_y[i]-self.ref_ind_y,direction,rr)
-        
-        print(k)
+        if len(self.ref_ind_m)==0: self.ref_star_K.append([[0],[0]])
+        else:
+           #direction = [(1,1),(1,0),(1,-1),(0,-1)]
+           xx0=self.ref_star_x[i]-self.ref_ind_x[0]
+           yy0=self.ref_star_y[i]-self.ref_ind_y[0]
+           rr=(xx0**2+yy0**2)**0.5
+           xx0=xx0/rr
+           yy0=yy0/rr
+           direction = [(xx0,yy0),(-1*yy0,xx0)]
+           k = find_projection(self.ref_star_x[i]-self.ref_ind_x,self.ref_star_y[i]-self.ref_ind_y,direction,rr)
+           k=[k[0][1:],k[1][1:]]
+   
+           self.ref_star_K.append(k)
 
-        self.ref_ind_N.append(len(ref_dist))
 
-    
+    self.field_star_K=[]
+
     for i,tmp in enumerate(self.field_star_m):
         dist=(self.field_star_x[i]-self.field_x)**2+(self.field_star_y[i]-self.field_y)**2        
         maska1=dist<(radius_field)**2
@@ -150,12 +139,76 @@ class StarMatch():
         self.field_ind_y=self.field_y[maska]
         self.field_ind_m=self.field_m[maska]
 
-        self.field_ind_N.append(len(field_dist))
+        if len(self.field_ind_m)==0: self.field_star_K.append([[0],[0]])
+        else:
+           #direction = [(1,1),(1,0),(1,-1),(0,-1)]
+           xx0=self.field_star_x[i]-self.field_ind_x[0]
+           yy0=self.field_star_y[i]-self.field_ind_y[0]
+           rr=(xx0**2+yy0**2)**0.5
+           xx0=xx0/rr
+           yy0=yy0/rr
+           direction = [(xx0,yy0),(-1*yy0,xx0)]
+           k = find_projection(self.field_star_x[i]-self.field_ind_x,self.field_star_y[i]-self.field_ind_y,direction,rr)
+           k=[k[0][1:],k[1][1:]]
+   
+           self.field_star_K.append(k)
+    
+    z=0
+    self.ref_match_x=[]
+    self.ref_match_y=[]
+    self.field_match_x=[]
+    self.field_match_y=[]    
+    for i,tmp in enumerate(self.ref_star_K): 
+        #self.ref_match_x.append(self.ref_star_x[i])
+        #self.ref_match_y.append(self.ref_star_y[i])      
+        print(self.ref_star_x[i],self.ref_star_x[i],self.ref_star_m[i])       
+        for j,tmp in enumerate(self.field_star_K):
+            s,d = check_starlist(self.ref_star_K[i],self.field_star_K[j],0.1)
+            if s>0.4: 
+               z=z+1
+               print(int(s*100),d,self.ref_star_x[i]-self.field_star_x[j],self.ref_star_y[i]-self.field_star_y[j])
+               self.ref_match_x.append(self.ref_star_x[i])
+               self.ref_match_y.append(self.ref_star_y[i])  
+               self.field_match_x.append(self.field_star_x[j])
+               self.field_match_y.append(self.field_star_y[j])
 
 
-    #print(self.ref_ind_N)       
-    #print(self.field_ind_N)   
+    print(z)
+        
+        
 
+
+
+
+
+
+
+
+
+
+def check_starlist(g1, g2,err):
+    x1=g1[0]
+    y1=g1[1]
+    x2=g2[0]
+    y2=g2[1]
+    if len(x1)==0 or len(x2)==0: return 0,100
+    if x1[0]==0 and x2[0]==0: return 1,100
+    n_max = min(len(x1),len(x2))
+    score=0
+    diff = abs(sum(x1[:n_max])-sum(x2[:n_max]))+abs(sum(y1[:n_max])-sum(y2[:n_max]))
+    for i in range(n_max):
+        #if x1[i]/x2[i]<1+err and x1[i]/x2[i]>1-err and y1[i]/y2[i]<1+err and y1[i]/y2[i]>1-err: 
+        if abs(x1[i]-x2[i])<err and abs(y1[i]-y2[i])<err: 
+           score=score+(n_max-i)
+           #score=score+1
+    #if score/max(len(x1),len(x2))>0.5: 
+    #   print(score,len(x1),len(x2),x1[:n_max]/x2[:n_max]) 
+    score=score/(0.5*n_max*(n_max+1))     
+    #return score/max(len(x1),len(x2)),diff   
+    return score,diff
+    
+        
+        
 
 
 #wczytuje plik od lini
