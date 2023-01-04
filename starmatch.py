@@ -13,7 +13,7 @@ file_name_2=sys.argv[3]
 
 
 if ".ap" in file_name_1:
-   dane=loadap(file_name_1)
+   dane,bledy=loadap(file_name_1)
 elif ".out" in file_name_1:
    dane=loadout(file_name_1)
 else: dane=load_file(0,file_name_1)   
@@ -22,8 +22,9 @@ x_ref=dane[1]
 y_ref=dane[2]
 m_ref=dane[3]
 
+
 if ".ap" in file_name_2:
-   dane=loadap(file_name_2)
+   dane,bledy=loadap(file_name_2)
 elif ".out" in file_name_2:
    dane=loadout(file_name_2)
 else: dane=load_file(0,file_name_2)   
@@ -31,6 +32,8 @@ else: dane=load_file(0,file_name_2)
 x_file=dane[1]
 y_file=dane[2]
 m_file=dane[3]
+
+
 
 
 sm=StarMatch()

@@ -7,11 +7,12 @@ import numpy
 
 class StarMatch():
   def __init__(self):
-    self.nb_use=500                   # tyle gwiazd do brania pod uwage w liczeniu indeksu geometrycznego
+    self.nb_use=400                   # tyle gwiazd do brania pod uwage w liczeniu indeksu geometrycznego
     self.nbPCent_match=0.25           # dla tylu gwiazd (procentowo) zostanie porownany indeks geometryczny
-    self.pixscale="auto"
     self.nbStarsRadius=10              # liczba gwiazd w promieniu porownania
-    self.scale=1
+    self.scale=1                       # SOFI/HAWKI(1CHIP)  = 7.5/2.5/4 = 0.75
+    self.pixscale=2.71                    # SOFI/HAWKI = 0.288/0.106 = 2.71
+
     self.ref_xr=[]
     self.ref_yr=[]
     self.ref_mr=[]
@@ -20,7 +21,7 @@ class StarMatch():
     self.field_mr=[]
 
   def go(self):
-    self.fieldscale=float(self.scale)**2   # pole skaluje sie z kwadratem skali pixela
+    self.fieldscale=float(self.scale)**2   # pole skaluje sie z kwadratem skali obrazka
     
 
     self.ref_mr,self.ref_xr,self.ref_yr=zip(*sorted(zip(self.ref_mr,self.ref_xr,self.ref_yr)))
@@ -69,9 +70,11 @@ class StarMatch():
     ref_dy=max(self.ref_y)-min(self.ref_y)
     field_dx=max(self.field_x)-min(self.field_x)
     field_dy=max(self.field_y)-min(self.field_y)    
-    if self.pixscale=="auto":
-       radius_ref=0.5*(self.nbStarsRadius/(float(len(self.ref_m))/float(ref_dx*ref_dy)))**0.5
-       radius_field=0.5*(self.nbStarsRadius/(float(len(self.field_m))/float(field_dx*field_dy)))**0.5
+    #if self.pixscale=="auto":
+    #   radius_ref=0.5*(self.nbStarsRadius/(float(len(self.ref_m))/float(ref_dx*ref_dy)))**0.5
+    #   radius_field=0.5*(self.nbStarsRadius/(float(len(self.field_m))/float(field_dx*field_dy)))**0.5
+    radius_ref=0.5*(self.nbStarsRadius/(float(len(self.ref_m))/float(ref_dx*ref_dy)))**0.5
+    radius_field=radius_ref*self.pixscale
     print("promien indeksowania: ",radius_ref,radius_field)
 
     self.ref_m=numpy.array(self.ref_m)
@@ -161,7 +164,7 @@ class StarMatch():
     for i,tmp in enumerate(self.ref_star_K): 
         #self.ref_match_x.append(self.ref_star_x[i])
         #self.ref_match_y.append(self.ref_star_y[i])      
-        print(self.ref_star_x[i],self.ref_star_x[i],self.ref_star_m[i])       
+        print(self.ref_star_x[i],self.ref_star_y[i],self.ref_star_m[i])       
         for j,tmp in enumerate(self.field_star_K):
             s,d = check_starlist(self.ref_star_K[i],self.field_star_K[j],0.1)
             if s>0.4: 
@@ -231,7 +234,7 @@ def loadap(file):
     i=0
     dane=[]
     bledy=[]
-    przelacznik=2
+    przelacznik=0
     for line in f:
        if i>2 and len(line.split())>0:
 	       if przelacznik == 0:
@@ -239,8 +242,6 @@ def loadap(file):
 	          przelacznik=1
 	       elif przelacznik == 1:
 	          bledy.append(line.split())
-	          przelacznik=2
-	       elif przelacznik == 2:
 	          przelacznik=0
        i=i+1
     dane=list(zip(*dane))
