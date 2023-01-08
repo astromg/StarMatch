@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys
+import sys, random
 import numpy 
 
 
@@ -7,11 +7,11 @@ import numpy
 
 class StarMatch():
   def __init__(self):
-    self.nb_use=400                   # tyle gwiazd do brania pod uwage w liczeniu indeksu geometrycznego
+    self.nb_use=200                   # tyle gwiazd do brania pod uwage w liczeniu indeksu geometrycznego
     self.nbPCent_match=0.25           # dla tylu gwiazd (procentowo) zostanie porownany indeks geometryczny
     self.nbStarsRadius=10              # liczba gwiazd w promieniu porownania
-    self.scale=1                       # SOFI/HAWKI(1CHIP)  = 7.5/2.5/4 = 0.75
-    self.pixscale=2.71                    # SOFI/HAWKI = 0.288/0.106 = 2.71
+    self.fieldStarsRatio=1             # SOFI/HAWKI(1CHIP)  = ( 4.9/(7.5/2) )**2 = 1.7
+    self.pixscale=1                    # SOFI/HAWKI = 0.288/0.106 = 2.71
 
     self.ref_xr=[]
     self.ref_yr=[]
@@ -21,8 +21,62 @@ class StarMatch():
     self.field_mr=[]
 
   def go(self):
-    self.fieldscale=float(self.scale)**2   # pole skaluje sie z kwadratem skali obrazka
-    
+      self.projectionMatch() 
+      self.trianglesMatch()
+      print("triangles matched stars: ",len(self.trainglesMatch_ref_x))
+
+  def trianglesMatch(self):
+    self.trainglesMatch_ref_x=[]
+    self.trainglesMatch_ref_y=[]
+    self.trainglesMatch_field_x=[]
+    self.trainglesMatch_field_y=[]
+
+    self.trainglesFail_ref_x=[]
+    self.trainglesFail_ref_y=[]
+    self.trainglesFail_field_x=[]
+    self.trainglesFail_field_y=[]
+
+    i_tab=list(range(len(self.ref_match_x)))
+    for i,tmp in enumerate(self.ref_match_x):
+        if len(i_tab)>2:
+           i_tab.remove(i)
+           i1=i
+           i2,i3=random.sample(i_tab, 2)
+           ax=[self.ref_match_x[i1],self.ref_match_x[i2],self.ref_match_x[i3]]
+           ay=[self.ref_match_y[i1],self.ref_match_y[i2],self.ref_match_y[i3]]
+           bx=[self.field_match_x[i1],self.field_match_x[i2],self.field_match_x[i3]]
+           by=[self.field_match_y[i1],self.field_match_y[i2],self.field_match_y[i3]]
+           if triangleCompare(ax,ay,bx,by):  
+              self.trainglesMatch_ref_x.append(self.ref_match_x[i1])
+              self.trainglesMatch_ref_y.append(self.ref_match_y[i1])
+              self.trainglesMatch_field_x.append(self.field_match_x[i1])
+              self.trainglesMatch_field_y.append(self.field_match_y[i1])
+           else: 
+              self.trainglesFail_ref_x.append(self.ref_match_x[i1])
+              self.trainglesFail_ref_y.append(self.ref_match_y[i1])
+              self.trainglesFail_field_x.append(self.field_match_x[i1])
+              self.trainglesFail_field_y.append(self.field_match_y[i1])     
+     
+    # sprawdzanie niedobitkow 
+    i_tab=list(range(len(self.trainglesMatch_ref_x)))
+    for i,tmp in enumerate(self.trainglesFail_ref_x):
+        if len(i_tab)>2:
+           i1=i
+           i2,i3=random.sample(i_tab, 2)
+           ax=[self.trainglesFail_ref_x[i1],self.trainglesMatch_ref_x[i2],self.trainglesMatch_ref_x[i3]]
+           ay=[self.trainglesFail_ref_y[i1],self.trainglesMatch_ref_y[i2],self.trainglesMatch_ref_y[i3]]
+           bx=[self.field_match_x[i1],self.trainglesMatch_field_x[i2],self.trainglesMatch_field_x[i3]]
+           by=[self.field_match_y[i1],self.trainglesMatch_field_y[i2],self.trainglesMatch_field_y[i3]]
+           if triangleCompare(ax,ay,bx,by):  
+              print("triangles star retrived")
+              self.trainglesMatch_ref_x.append(self.trainglesFail_ref_x[i1])
+              self.trainglesMatch_ref_y.append(self.trainglesFail_ref_y[i1])
+              self.trainglesMatch_field_x.append(self.trainglesFail_field_x[i1])
+              self.trainglesMatch_field_y.append(self.trainglesFail_field_y[i1])
+
+
+  def projectionMatch(self):
+    self.fieldStarsRatio=float(self.fieldStarsRatio)
 
     self.ref_mr,self.ref_xr,self.ref_yr=zip(*sorted(zip(self.ref_mr,self.ref_xr,self.ref_yr)))
     self.field_mr,self.field_xr,self.field_yr=zip(*sorted(zip(self.field_mr,self.field_xr,self.field_yr)))
@@ -37,32 +91,32 @@ class StarMatch():
 
     len_ref=len(self.ref_mr)
     len_field=len(self.field_mr)
-    if len_ref>self.nb_use+100 and len_field>self.nb_use*self.fieldscale+100:
+    if len_ref>self.nb_use and len_field>self.nb_use/self.fieldStarsRatio:
        self.ref_m=self.ref_mr[:self.nb_use]
        self.ref_x=self.ref_xr[:self.nb_use]
        self.ref_y=self.ref_yr[:self.nb_use]
-       self.field_m=self.field_mr[:int(self.nb_use*self.fieldscale)]
-       self.field_x=self.field_xr[:int(self.nb_use*self.fieldscale)]
-       self.field_y=self.field_yr[:int(self.nb_use*self.fieldscale)]       
+       self.field_m=self.field_mr[:int(self.nb_use/self.fieldStarsRatio)]
+       self.field_x=self.field_xr[:int(self.nb_use/self.fieldStarsRatio)]
+       self.field_y=self.field_yr[:int(self.nb_use/self.fieldStarsRatio)]       
     else:
-       if len_ref<len_field*self.fieldscale:
+       if len_ref<len_field*self.fieldStarsRatio:
           if len_ref>20:
              len_ref=int(len_ref/2.)
           self.ref_m=self.ref_mr[:len_ref]
           self.ref_x=self.ref_xr[:len_ref]
           self.ref_y=self.ref_yr[:len_ref]
-          self.field_m=self.field_mr[:int(len_ref*self.fieldscale)]
-          self.field_x=self.field_xr[:int(len_ref*self.fieldscale)]
-          self.field_y=self.field_yr[:int(len_ref*self.fieldscale)]           
+          self.field_m=self.field_mr[:int(len_ref/self.fieldStarsRatio)]
+          self.field_x=self.field_xr[:int(len_ref/self.fieldStarsRatio)]
+          self.field_y=self.field_yr[:int(len_ref/self.fieldStarsRatio)]           
        else:
           if len_field>20:
              len_field=int(len_field/2.)
           self.ref_m=self.ref_mr[:len_field]
           self.ref_x=self.ref_xr[:len_field]
           self.ref_y=self.ref_yr[:len_field]
-          self.field_m=self.field_mr[:int(len_field*self.fieldscale)]
-          self.field_x=self.field_xr[:int(len_field*self.fieldscale)]
-          self.field_y=self.field_yr[:int(len_field*self.fieldscale)]  
+          self.field_m=self.field_mr[:int(len_field/self.fieldStarsRatio)]
+          self.field_x=self.field_xr[:int(len_field/self.fieldStarsRatio)]
+          self.field_y=self.field_yr[:int(len_field/self.fieldStarsRatio)]  
 
     print("liczba gwiazd do porownania: ",len(self.ref_m),len(self.field_m))
 
@@ -70,9 +124,6 @@ class StarMatch():
     ref_dy=max(self.ref_y)-min(self.ref_y)
     field_dx=max(self.field_x)-min(self.field_x)
     field_dy=max(self.field_y)-min(self.field_y)    
-    #if self.pixscale=="auto":
-    #   radius_ref=0.5*(self.nbStarsRadius/(float(len(self.ref_m))/float(ref_dx*ref_dy)))**0.5
-    #   radius_field=0.5*(self.nbStarsRadius/(float(len(self.field_m))/float(field_dx*field_dy)))**0.5
     radius_ref=0.5*(self.nbStarsRadius/(float(len(self.ref_m))/float(ref_dx*ref_dy)))**0.5
     radius_field=radius_ref*self.pixscale
     print("promien indeksowania: ",radius_ref,radius_field)
@@ -144,7 +195,6 @@ class StarMatch():
 
         if len(self.field_ind_m)==0: self.field_star_K.append([[0],[0]])
         else:
-           #direction = [(1,1),(1,0),(1,-1),(0,-1)]
            xx0=self.field_star_x[i]-self.field_ind_x[0]
            yy0=self.field_star_y[i]-self.field_ind_y[0]
            rr=(xx0**2+yy0**2)**0.5
@@ -156,34 +206,26 @@ class StarMatch():
    
            self.field_star_K.append(k)
     
-    z=0
+    self.succesRate_projection=0
     self.ref_match_x=[]
     self.ref_match_y=[]
     self.field_match_x=[]
     self.field_match_y=[]    
     for i,tmp in enumerate(self.ref_star_K): 
-        #self.ref_match_x.append(self.ref_star_x[i])
-        #self.ref_match_y.append(self.ref_star_y[i])      
-        print(self.ref_star_x[i],self.ref_star_y[i],self.ref_star_m[i])       
+        s_max=0   
+        j_match=0   
         for j,tmp in enumerate(self.field_star_K):
             s,d = check_starlist(self.ref_star_K[i],self.field_star_K[j],0.1)
-            if s>0.4: 
-               z=z+1
-               print(int(s*100),d,self.ref_star_x[i]-self.field_star_x[j],self.ref_star_y[i]-self.field_star_y[j])
-               self.ref_match_x.append(self.ref_star_x[i])
-               self.ref_match_y.append(self.ref_star_y[i])  
-               self.field_match_x.append(self.field_star_x[j])
-               self.field_match_y.append(self.field_star_y[j])
-
-
-    print(z)
-        
-        
-
-
-
-
-
+            if s>s_max:
+               s_max=s
+               j_match=j
+        if s_max>0.4: 
+           self.succesRate_projection=self.succesRate_projection+1
+           self.ref_match_x.append(self.ref_star_x[i])
+           self.ref_match_y.append(self.ref_star_y[i])  
+           self.field_match_x.append(self.field_star_x[j_match])
+           self.field_match_y.append(self.field_star_y[j_match])
+    print("patern match scucces rate: ",self.succesRate_projection/len(self.ref_star_K))
 
 
 
@@ -209,9 +251,41 @@ def check_starlist(g1, g2,err):
     score=score/(0.5*n_max*(n_max+1))     
     #return score/max(len(x1),len(x2)),diff   
     return score,diff
-    
+
+def triangleCompare(ax,ay,bx,by):
+    av1 = [ax[0]-ax[1],ay[0]-ay[1]]
+    av2 = [ax[0]-ax[2],ay[0]-ay[2]]
+    av3 = [ax[1]-ax[2],ay[1]-ay[2]]
+    av1= av1 / numpy.linalg.norm(av1)
+    av2= av2 / numpy.linalg.norm(av2)
+    av3= av3 / numpy.linalg.norm(av3)
+    DotP1,DotP2,DotP3 = numpy.dot(av1, av2),numpy.dot(av1, av3),numpy.dot(av2, av3)
+    a_fi1 = numpy.arccos(DotP1)
+    a_fi2 = numpy.arccos(DotP2)
+    a_fi3 = numpy.arccos(DotP3)
+
+    bv1 = [bx[0]-bx[1],by[0]-by[1]]
+    bv2 = [bx[0]-bx[2],by[0]-by[2]]
+    bv3 = [bx[1]-bx[2],by[1]-by[2]]
+    if bv1 == [0,0] or bv2 == [0,0] or bv3 == [0,0]: return False  # bo na liscie field moga powtarzac sie gwiazdy
+    bv1= bv1 / numpy.linalg.norm(bv1)
+    bv2= bv2 / numpy.linalg.norm(bv2)
+    bv3= bv3 / numpy.linalg.norm(bv3)
+    DotP1,DotP2,DotP3 = numpy.dot(bv1, bv2),numpy.dot(bv1, bv3),numpy.dot(bv2, bv3)
+    b_fi1 = numpy.arccos(DotP1)
+    b_fi2 = numpy.arccos(DotP2)
+    b_fi3 = numpy.arccos(DotP3)
+
+    #print(a_fi1,a_fi2,a_fi3,"  :  ",b_fi1,b_fi2,b_fi3) 
+
+    if abs(a_fi1-b_fi1)<0.01 and abs(a_fi2-b_fi2)<0.01 and abs(a_fi3-b_fi3)<0.01:
+       return True
+    else: return False   
+
         
-        
+
+def find_projection(x,y,direction,r):
+    return numpy.array([(i[0]*x + i[1]*y)/r for i in direction])        
 
 
 #wczytuje plik od lini
@@ -249,9 +323,6 @@ def loadap(file):
     return dane, bledy
 
 #---------------------------------------------------------------
-
-def find_projection(x,y,direction,r):
-    return numpy.array([(i[0]*x + i[1]*y)/r for i in direction])
 
 #wczytuje plik .out 
 #dane=loadout(smc01.out)

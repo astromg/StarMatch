@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication
 
 import matplotlib.pyplot as plt
 
-scale=sys.argv[1]    # scale = field (x or y) size file to size reference field: sofi=ref; scale hawki/sofi = 7.5/5
+ratio=sys.argv[1]    # scale = field (x or y) size file to size reference field: sofi=ref; scale hawki/sofi = 7.5/5
 file_name_1=sys.argv[2]
 file_name_2=sys.argv[3]
 
@@ -37,7 +37,9 @@ m_file=dane[3]
 
 
 sm=StarMatch()
-sm.scale=scale
+sm.fieldStarsRatio=ratio
+#sm.nb_use=400
+sm.pixscale=1
 sm.ref_xr=x_ref
 sm.ref_yr=y_ref
 sm.ref_mr=m_ref
@@ -47,11 +49,19 @@ sm.field_mr=m_file
 
 sm.go()
 
-xx1=sm.ref_match_x
-yy1=sm.ref_match_y
 
-xx2=sm.field_match_x
-yy2=sm.field_match_y
+
+
+xx1=sm.trainglesMatch_ref_x
+yy1=sm.trainglesMatch_ref_y
+xx2=sm.trainglesMatch_field_x
+yy2=sm.trainglesMatch_field_y
+
+#xx1=sm.trainglesFail_ref_x
+#yy1=sm.trainglesFail_ref_y
+#xx2=sm.trainglesFail_field_x
+#yy2=sm.trainglesFail_field_y
+
 
 #dist = CountDist(x_ref,y_ref)
 
