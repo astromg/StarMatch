@@ -3,8 +3,6 @@ import sys, random
 import numpy 
 
 
-
-
 class StarMatch():
   def __init__(self):
     self.nb_use=200                   # tyle gwiazd do brania pod uwage w liczeniu indeksu geometrycznego
@@ -24,6 +22,45 @@ class StarMatch():
       self.projectionMatch() 
       self.trianglesMatch()
       print("triangles matched stars: ",len(self.trainglesMatch_ref_x))
+      self.findtrans()
+
+
+  def findtrans(self):
+      if len(self.ref_xr)>10:
+
+         # Field -> Ref
+         x=numpy.array(self.field_match_x)
+         y=numpy.array(self.field_match_y)       
+         MX = numpy.array(list(zip(numpy.ones(len(x)),x,y,x*y,x*x,y*y)))
+         MY = numpy.array(self.ref_match_x)
+         a,I,r = glsq(MX,MY)
+         p_rf_x = numpy.array(a.getT())[0]
+         print(p_rf_x)
+
+         MX = numpy.array(list(zip(numpy.ones(len(x)),x,y,x*y,x*x,y*y)))
+         MY = numpy.array(self.ref_match_y)
+         a,I,r = glsq(MX,MY)
+         p_rf_y = numpy.array(a.getT())[0]
+         print(p_rf_y)
+
+
+         # Ref -> Field
+         x=numpy.array(self.ref_match_x)
+         y=numpy.array(self.ref_match_y)       
+         MX = numpy.array(list(zip(numpy.ones(len(x)),x,y,x*y,x*x,y*y)))
+         MY = numpy.array(self.field_match_x)
+         a,I,r = glsq(MX,MY)
+         p_fr_x = numpy.array(a.getT())[0]
+         print(p_fr_x)
+
+         MX = numpy.array(list(zip(numpy.ones(len(x)),x,y,x*y,x*x,y*y)))
+         MY = numpy.array(self.field_match_y)
+         a,I,r = glsq(MX,MY)
+         p_fr_y = numpy.array(a.getT())[0]
+         print(p_fr_y)
+
+
+
 
   def trianglesMatch(self):
     self.trainglesMatch_ref_x=[]
@@ -336,6 +373,28 @@ def loadout(file):
     dane=list(zip(*dane))
     return dane	 
 
+def glsq(X,Y):
+    #GLSQ 
+    # a,I = glsq(X,Y)
+    # Y - wektor dopasowania
+    # X - macierz wartosci
+    # a - wektor wspolczynnikow
+    # I - macierz kowariancji
+    X=numpy.matrix(X)
+    Y=numpy.matrix(Y)  
+    b=Y.getT()
+    T=X.getT()
+    TX=T*X
+    I=TX.getI()
+    a=I*T*b 
+    r=numpy.array(Y)-numpy.squeeze(X*a)
+    return a,I,r
+
+def CooTrans(data,a1,a2,a3,a4,a5,a6):
+    x1=numpy.array(data[0])
+    x2=numpy.array(data[1])
+    y = a1 + a2 * x1 + a3 * x2 + a4 * x1*x2 + a5 * x1**2 + a6 * x2**2
+    return y
 
 def CountDist(xr,yr):
     dist=[]
