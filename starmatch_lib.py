@@ -83,7 +83,8 @@ class StarMatch():
            ay=[self.ref_match_y[i1],self.ref_match_y[i2],self.ref_match_y[i3]]
            bx=[self.field_match_x[i1],self.field_match_x[i2],self.field_match_x[i3]]
            by=[self.field_match_y[i1],self.field_match_y[i2],self.field_match_y[i3]]
-           if triangleCompare(ax,ay,bx,by):  
+           error=0.03
+           if triangleCompare(ax,ay,bx,by,error):  
               self.trainglesMatch_ref_x.append(self.ref_match_x[i1])
               self.trainglesMatch_ref_y.append(self.ref_match_y[i1])
               self.trainglesMatch_field_x.append(self.field_match_x[i1])
@@ -104,7 +105,8 @@ class StarMatch():
            ay=[self.trainglesFail_ref_y[i1],self.trainglesMatch_ref_y[i2],self.trainglesMatch_ref_y[i3]]
            bx=[self.field_match_x[i1],self.trainglesMatch_field_x[i2],self.trainglesMatch_field_x[i3]]
            by=[self.field_match_y[i1],self.trainglesMatch_field_y[i2],self.trainglesMatch_field_y[i3]]
-           if triangleCompare(ax,ay,bx,by):  
+           error=0.03
+           if triangleCompare(ax,ay,bx,by,error):  
               print("triangles star retrived")
               self.trainglesMatch_ref_x.append(self.trainglesFail_ref_x[i1])
               self.trainglesMatch_ref_y.append(self.trainglesFail_ref_y[i1])
@@ -256,13 +258,13 @@ class StarMatch():
             if s>s_max:
                s_max=s
                j_match=j
-        if s_max>0.4: 
+        if s_max>0.5: 
            self.succesRate_projection=self.succesRate_projection+1
            self.ref_match_x.append(self.ref_star_x[i])
            self.ref_match_y.append(self.ref_star_y[i])  
            self.field_match_x.append(self.field_star_x[j_match])
            self.field_match_y.append(self.field_star_y[j_match])
-    print("patern match scucces rate: ",self.succesRate_projection/len(self.ref_star_K))
+    print("patern match scucces rate: ",self.succesRate_projection/len(self.field_star_K))
 
 
 
@@ -289,7 +291,7 @@ def check_starlist(g1, g2,err):
     #return score/max(len(x1),len(x2)),diff   
     return score,diff
 
-def triangleCompare(ax,ay,bx,by):
+def triangleCompare(ax,ay,bx,by,error):
     av1 = [ax[0]-ax[1],ay[0]-ay[1]]
     av2 = [ax[0]-ax[2],ay[0]-ay[2]]
     av3 = [ax[1]-ax[2],ay[1]-ay[2]]
@@ -315,7 +317,7 @@ def triangleCompare(ax,ay,bx,by):
 
     #print(a_fi1,a_fi2,a_fi3,"  :  ",b_fi1,b_fi2,b_fi3) 
 
-    if abs(a_fi1-b_fi1)<0.01 and abs(a_fi2-b_fi2)<0.01 and abs(a_fi3-b_fi3)<0.01:
+    if abs(a_fi1-b_fi1)<error and abs(a_fi2-b_fi2)<error and abs(a_fi3-b_fi3)<error:
        return True
     else: return False   
 

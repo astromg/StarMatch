@@ -35,11 +35,10 @@ m_file=dane[3]
 
 
 
-
 sm=StarMatch()
 sm.fieldStarsRatio=ratio
-#sm.nb_use=400
-sm.pixscale=1
+sm.nb_use=400
+sm.pixscale=2.71
 sm.ref_xr=x_ref
 sm.ref_yr=y_ref
 sm.ref_mr=m_ref
