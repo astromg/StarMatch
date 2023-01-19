@@ -7,9 +7,8 @@ from PyQt5.QtWidgets import QApplication
 
 import matplotlib.pyplot as plt
 
-ratio=sys.argv[1]    # scale = field (x or y) size file to size reference field: sofi=ref; scale hawki/sofi = 7.5/5
-file_name_1=sys.argv[2]
-file_name_2=sys.argv[3]
+file_name_1=sys.argv[1]
+file_name_2=sys.argv[2]
 
 
 if ".ap" in file_name_1:
@@ -36,9 +35,10 @@ m_file=dane[3]
 
 
 sm=StarMatch()
-sm.fieldStarsRatio=ratio
-sm.nb_use=400
-sm.pixscale=2.71
+sm.loud=True
+sm.nb_use=200
+sm.pixscale=0.3680           # HAWKI
+sm.fieldStarsRatio=0.58    # HAWKI
 sm.ref_xr=x_ref
 sm.ref_yr=y_ref
 sm.ref_mr=m_ref
@@ -47,7 +47,26 @@ sm.field_yr=y_file
 sm.field_mr=m_file
 
 sm.go()
+print(sm.mssg)
+print(sm.p_fr_x)
+print(sm.p_fr_y)
+print(sm.p_rf_x)
+print(sm.p_rf_y)
 
+
+# transformacje:    x = p[0] + p[1] * x + p[2] * y + p[3] * x*y + p[4] * x*x + p[5] * y*y
+# transformacje:    x = p[0] + p[1] * x + p[2] * y + p[3] * x*y + p[4] * x*x + p[5] * y*y
+
+# sm.p_fr_x  - x field -> reference
+# sm.p_fr_y  - y field -> reference
+
+# sm.p_rf_x  - x reference -> field
+# sm.p_rf_y  - x reference -> field
+
+# sm.ref_match_x            - lista gwiazd zmatchowanych featureami 
+# m.field_match_x
+# sm.trainglesMatch_ref_x   - lista gwiazd zmatchowanych trujkatami
+# sm.trainglesFail_ref_x    - lista gwiazd odrzucona przez trujkaty
 
 #xx1=sm.trainglesMatch_ref_x
 #yy1=sm.trainglesMatch_ref_y
