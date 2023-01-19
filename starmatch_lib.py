@@ -27,37 +27,37 @@ class StarMatch():
 
   def findtrans(self):
       if len(self.ref_xr)>10:
-
          # Field -> Ref
-         x=numpy.array(self.field_match_x)
-         y=numpy.array(self.field_match_y)       
+         x=numpy.array(self.trainglesMatch_ref_x)
+         y=numpy.array(self.trainglesMatch_ref_y)       
          MX = numpy.array(list(zip(numpy.ones(len(x)),x,y,x*y,x*x,y*y)))
-         MY = numpy.array(self.ref_match_x)
-         a,I,r = glsq(MX,MY)
-         p_rf_x = numpy.array(a.getT())[0]
-         print(p_rf_x)
 
-         MX = numpy.array(list(zip(numpy.ones(len(x)),x,y,x*y,x*x,y*y)))
-         MY = numpy.array(self.ref_match_y)
+         MY = numpy.array(self.trainglesMatch_field_x)
          a,I,r = glsq(MX,MY)
-         p_rf_y = numpy.array(a.getT())[0]
-         print(p_rf_y)
+         self.p_rf_x = numpy.array(a.getT())[0]
+         print(self.p_rf_x)
+
+         #MX = numpy.array(list(zip(numpy.ones(len(x)),x,y,x*y,x*x,y*y)))
+         MY = numpy.array(self.trainglesMatch_field_y)
+         a,I,r = glsq(MX,MY)
+         self.p_rf_y = numpy.array(a.getT())[0]
+         print(self.p_rf_y)
 
 
          # Ref -> Field
-         x=numpy.array(self.ref_match_x)
-         y=numpy.array(self.ref_match_y)       
+         x=numpy.array(self.trainglesMatch_field_x)
+         y=numpy.array(self.trainglesMatch_field_y)       
          MX = numpy.array(list(zip(numpy.ones(len(x)),x,y,x*y,x*x,y*y)))
-         MY = numpy.array(self.field_match_x)
+         MY = numpy.array(self.trainglesMatch_ref_x)
          a,I,r = glsq(MX,MY)
-         p_fr_x = numpy.array(a.getT())[0]
-         print(p_fr_x)
+         self.p_fr_x = numpy.array(a.getT())[0]
+         print(self.p_fr_x)
 
-         MX = numpy.array(list(zip(numpy.ones(len(x)),x,y,x*y,x*x,y*y)))
-         MY = numpy.array(self.field_match_y)
+         #MX = numpy.array(list(zip(numpy.ones(len(x)),x,y,x*y,x*x,y*y)))
+         MY = numpy.array(self.trainglesMatch_ref_y)
          a,I,r = glsq(MX,MY)
-         p_fr_y = numpy.array(a.getT())[0]
-         print(p_fr_y)
+         self.p_fr_y = numpy.array(a.getT())[0]
+         print(self.p_fr_y)
 
 
 
@@ -83,7 +83,7 @@ class StarMatch():
            ay=[self.ref_match_y[i1],self.ref_match_y[i2],self.ref_match_y[i3]]
            bx=[self.field_match_x[i1],self.field_match_x[i2],self.field_match_x[i3]]
            by=[self.field_match_y[i1],self.field_match_y[i2],self.field_match_y[i3]]
-           error=0.03
+           error=0.01
            if triangleCompare(ax,ay,bx,by,error):  
               self.trainglesMatch_ref_x.append(self.ref_match_x[i1])
               self.trainglesMatch_ref_y.append(self.ref_match_y[i1])
@@ -105,7 +105,7 @@ class StarMatch():
            ay=[self.trainglesFail_ref_y[i1],self.trainglesMatch_ref_y[i2],self.trainglesMatch_ref_y[i3]]
            bx=[self.field_match_x[i1],self.trainglesMatch_field_x[i2],self.trainglesMatch_field_x[i3]]
            by=[self.field_match_y[i1],self.trainglesMatch_field_y[i2],self.trainglesMatch_field_y[i3]]
-           error=0.03
+           error=0.01
            if triangleCompare(ax,ay,bx,by,error):  
               print("triangles star retrived")
               self.trainglesMatch_ref_x.append(self.trainglesFail_ref_x[i1])
@@ -360,8 +360,6 @@ def loadap(file):
     dane=list(zip(*dane))
     bledy=list(zip(*bledy))
     return dane, bledy
-
-#---------------------------------------------------------------
 
 #wczytuje plik .out 
 #dane=loadout(smc01.out)

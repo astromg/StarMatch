@@ -49,12 +49,21 @@ sm.field_mr=m_file
 sm.go()
 
 
-
-
-xx1=sm.trainglesMatch_ref_x
-yy1=sm.trainglesMatch_ref_y
+#xx1=sm.trainglesMatch_ref_x
+#yy1=sm.trainglesMatch_ref_y
 xx2=sm.trainglesMatch_field_x
 yy2=sm.trainglesMatch_field_y
+
+x=numpy.array(sm.trainglesMatch_field_x)
+y=numpy.array(sm.trainglesMatch_field_y)
+xx1=sm.p_fr_x[0]+sm.p_fr_x[1]*x+sm.p_fr_x[2]*y+sm.p_fr_x[3]*x*y+sm.p_fr_x[4]*x*x+sm.p_fr_x[5]*y*y
+yy1=sm.p_fr_y[0]+sm.p_fr_y[1]*x+sm.p_fr_y[2]*y+sm.p_fr_y[3]*x*y+sm.p_fr_y[4]*x*x+sm.p_fr_y[5]*y*y
+
+
+
+    
+
+
 
 #xx1=sm.trainglesFail_ref_x
 #yy1=sm.trainglesFail_ref_y
