@@ -1,4 +1,58 @@
 #!/usr/bin/env python3
+####################################
+#  Marek Gorski, Dominika Switlik  #
+####################################
+
+
+# x_tr,y_tr= coo_trans(x,y,p_fr_x,p_fr_y)
+# transformation:    x = p[0] + p[1] * x + p[2] * y + p[3] * x*y + p[4] * x*x + p[5] * y*y
+
+
+
+#     EXAMPLE 1   (SIMPLE)
+# sm=StarMatch()
+# sm.ref_xr=x_ref
+# sm.ref_yr=y_ref
+# sm.ref_mr=m_ref
+# sm.field_xr=x_field
+# sm.field_yr=y_field
+# sm.field_mr=m_field
+# sm.go()
+# print(sm.p_fr_x)      # field to reference
+# print(sm.p_fr_y)
+# print(sm.p_rf_x)      # reference to filed
+# print(sm.p_rf_y)
+
+#     EXAMPLE 2   (OTHER INSTRUMENTS)
+
+# sm=StarMatch()
+# sm.loud=True
+# sm.nb_use=400
+# sm.pixscale=0.3680           # HAWKI
+# sm.fieldStarsRatio=0.58    # HAWKI
+# sm.ref_xr=x_ref
+# sm.ref_yr=y_ref
+# sm.ref_mr=m_ref
+# sm.field_xr=x_field
+# sm.field_yr=y_field
+# sm.field_mr=m_field
+# sm.go()
+# print(sm.mssg)
+# print(sm.p_fr_x)
+# print(sm.p_fr_y)
+# print(sm.p_rf_x)
+# print(sm.p_rf_y)
+# sm.ref_match_x            - reference list with matched with feature recognition 
+# sm.ref_match_y            - reference list with matched with feature recognition 
+# sm.field_match_x          - field list with matched with feature recognition
+# sm.field_match_y          - field list with matched with feature recognition
+# sm.trainglesMatch_ref_x   - referece list with triangles match 
+# sm.trainglesMatch_ref_y   - referece list with triangles match 
+# sm.trainglesFail_ref_x    - reference list with traingles match fail
+# sm.trainglesFail_ref_y    - reference list with traingles match fail
+
+
+
 import sys, random
 import numpy 
 
@@ -11,6 +65,8 @@ class StarMatch():
     self.nbStarsRadius=10             # average number of stars within the radius for local feature calculation
     self.fieldStarsRatio=1            # ratio of expected number of stars in field/reference. Exp: HAWKI(1CHIP)/SOFI = (3.75/4.9)**2 = 0.58
     self.pixscale=1                   # ratio of pixel scale field/reference. Exp: HAWKI/SOFI = 0.3680   
+    self.starlist_error=0.05
+    self.min_score=0.5
     
     self.mssg=""
     self.ref_xr=[]
@@ -254,11 +310,14 @@ class StarMatch():
         s_max=0   
         j_match=0   
         for j,tmp in enumerate(self.field_star_K):
-            s,d = check_starlist(self.ref_star_K[i],self.field_star_K[j],0.1)
+            s,d = check_starlist(self.ref_star_K[i],self.field_star_K[j],self.starlist_error)
             if s>s_max:
                s_max=s
                j_match=j
-        if s_max>0.5: 
+        if s_max>self.min_score:
+           #print("s: ",s_max) 
+           #print("ref: ",self.ref_star_K[i])
+           #print("field: ",self.field_star_K[j_match])
            self.succesRate_projection=self.succesRate_projection+1
            self.ref_match_x.append(self.ref_star_x[i])
            self.ref_match_y.append(self.ref_star_y[i])  
@@ -271,6 +330,13 @@ class StarMatch():
 
 #---------------------------------------------------------------
 
+def coo_trans(x,y,px,py):
+    x=numpy.array(x)
+    y=numpy.array(y)
+    xt=px[0]+px[1]*x+px[2]*y+px[3]*x*y+px[4]*x*x+px[5]*y*y
+    yt=py[0]+py[1]*x+py[2]*y+py[3]*x*y+py[4]*x*x+py[5]*y*y
+    return xt,yt
+
 def check_starlist(g1, g2,err):
     x1=g1[0]
     y1=g1[1]
@@ -282,14 +348,10 @@ def check_starlist(g1, g2,err):
     score=0
     diff = abs(sum(x1[:n_max])-sum(x2[:n_max]))+abs(sum(y1[:n_max])-sum(y2[:n_max]))
     for i in range(n_max):
-        #if x1[i]/x2[i]<1+err and x1[i]/x2[i]>1-err and y1[i]/y2[i]<1+err and y1[i]/y2[i]>1-err: 
-        if abs(x1[i]-x2[i])<err and abs(y1[i]-y2[i])<err: 
-           score=score+(n_max-i)
-           #score=score+1
-    #if score/max(len(x1),len(x2))>0.5: 
-    #   print(score,len(x1),len(x2),x1[:n_max]/x2[:n_max]) 
-    score=score/(0.5*n_max*(n_max+1))     
-    #return score/max(len(x1),len(x2)),diff   
+        if abs(x1[i]-x2[i])<err and abs(y1[i]-y2[i])<err: score=score+(n_max-i)
+        elif i<n_max-1 and abs(x1[i]-x2[i+1])<err and abs(y1[i]-y2[i+1])<err: score=score+(n_max-i)
+        elif i>1 and abs(x1[i]-x2[i-1])<err and abs(y1[i]-y2[i-1])<err: score=score+(n_max-i)
+    score=score/(0.5*n_max*(n_max+1))       
     return score,diff
 
 def triangleCompare(ax,ay,bx,by,error):

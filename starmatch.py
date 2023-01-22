@@ -36,7 +36,7 @@ m_file=dane[3]
 
 sm=StarMatch()
 sm.loud=True
-sm.nb_use=200
+sm.nb_use=400
 sm.pixscale=0.3680           # HAWKI
 sm.fieldStarsRatio=0.58    # HAWKI
 sm.ref_xr=x_ref
@@ -55,7 +55,7 @@ print(sm.p_rf_y)
 
 
 # transformacje:    x = p[0] + p[1] * x + p[2] * y + p[3] * x*y + p[4] * x*x + p[5] * y*y
-# transformacje:    x = p[0] + p[1] * x + p[2] * y + p[3] * x*y + p[4] * x*x + p[5] * y*y
+# transformacje:    y = p[0] + p[1] * x + p[2] * y + p[3] * x*y + p[4] * x*x + p[5] * y*y
 
 # sm.p_fr_x  - x field -> reference
 # sm.p_fr_y  - y field -> reference
@@ -75,8 +75,11 @@ yy2=sm.trainglesMatch_field_y
 
 x=numpy.array(sm.trainglesMatch_field_x)
 y=numpy.array(sm.trainglesMatch_field_y)
-xx1=sm.p_fr_x[0]+sm.p_fr_x[1]*x+sm.p_fr_x[2]*y+sm.p_fr_x[3]*x*y+sm.p_fr_x[4]*x*x+sm.p_fr_x[5]*y*y
-yy1=sm.p_fr_y[0]+sm.p_fr_y[1]*x+sm.p_fr_y[2]*y+sm.p_fr_y[3]*x*y+sm.p_fr_y[4]*x*x+sm.p_fr_y[5]*y*y
+
+xx1,yy1= coo_trans(x,y,sm.p_fr_x,sm.p_fr_y)
+
+#xx1=sm.p_fr_x[0]+sm.p_fr_x[1]*x+sm.p_fr_x[2]*y+sm.p_fr_x[3]*x*y+sm.p_fr_x[4]*x*x+sm.p_fr_x[5]*y*y
+#yy1=sm.p_fr_y[0]+sm.p_fr_y[1]*x+sm.p_fr_y[2]*y+sm.p_fr_y[3]*x*y+sm.p_fr_y[4]*x*x+sm.p_fr_y[5]*y*y
 
 
 
