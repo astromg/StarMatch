@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import QApplication
 
 import matplotlib.pyplot as plt
 
+
 file_name_1=sys.argv[1]
 file_name_2=sys.argv[2]
 

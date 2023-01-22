@@ -315,9 +315,9 @@ class StarMatch():
                s_max=s
                j_match=j
         if s_max>self.min_score:
-           #print("s: ",s_max) 
-           #print("ref: ",self.ref_star_K[i])
-           #print("field: ",self.field_star_K[j_match])
+           print(self.ref_star_x[i],self.ref_star_y[i],self.field_star_x[j_match],self.field_star_y[j_match])
+           print("ref: ",self.ref_star_K[i])
+           print("field: ",self.field_star_K[j_match])
            self.succesRate_projection=self.succesRate_projection+1
            self.ref_match_x.append(self.ref_star_x[i])
            self.ref_match_y.append(self.ref_star_y[i])  
