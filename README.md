@@ -1,11 +1,56 @@
 # StarMatch
-Coordinates matching for reduced FITS files
+Coordinates transformation library and script for reduced FITS files (dedicated for daophot format files)
+
+**22.01.2023**  
+**Marek Gorski and Dominika Switlik** 
+
+### Reguirements:
+*python3, numpy 
+
+
+### Run:
+
+```console
+./starmatch_cl.py reference.ap field.ap 
+```
+**or**  
+
+```./starmatch_cl.py pixscale=2.3 starratio=0.7 reference.ap field.out```  #  mark point  
+
+### Basic description 
+
+bla bla **thumbnail** and *adds* bla bla
+
+
+### Library
+
+```
+from FitsView_gui import * # load FitsView class to Your script 
+cfg=["x_Col=1","y_Col=2"] # set up desired configuration. 
+FV_window = FitsView(cfg) # run the Pymage Widget class 
+FV_window.fname="plik.fits" # define FITS file name 
+FV_window.newFits() # execute new fits 
+FV_window.show() 
+```
+
+
+### Algorithm description
+
+
+![alt text](./Pictures/A1.png "window")
+
+reference x,y projection star1: -0.13465263,-1.34699033
+reference x,y projection star2: -0.13465263,-1.34699033
+
+field x,y projection star2: -0.61142403, -1.17670621
+field x,y projection star2: -0.62199523,  -1.18319083
+
+
+`cp FitsView* .` # copy FitsView files to working directory 
 
 
 
-ref:  [array([-0.69455466, -0.61142403, -0.13465263,  1.63398275,  1.24107164,
-       -2.66255561]), array([-1.97696815, -1.17670621, -1.34699033,  2.2517203 ,  2.31752727,
-       -1.92965106])]
-field:  [array([-0.62199523, -0.7047731 , -0.1369135 ,  1.24006187, -2.6762112 ,
-        0.81629447]), array([-1.18319083, -1.9880929 , -1.35778903,  2.31922229, -1.95098   ,
-        2.14176245])]
+
+#### Issues & ToDo:
+
+*  Implement small number of stars
