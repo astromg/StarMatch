@@ -66,7 +66,7 @@ class StarMatch():
     self.fieldStarsRatio=1            # ratio of expected number of stars in field/reference. Exp: HAWKI(1CHIP)/SOFI = (3.75/4.9)**2 = 0.58
     self.pixscale=1                   # ratio of pixel scale field/reference. Exp: HAWKI/SOFI = 0.3680   
     self.starlist_error=0.05
-    self.min_score=0.5
+    self.min_score=0.3
     
     self.mssg=""
     self.ref_xr=[]
@@ -184,6 +184,7 @@ class StarMatch():
 
     len_ref=len(self.ref_mr)
     len_field=len(self.field_mr)
+    
     if len_ref>self.nb_use and len_field>self.nb_use*self.fieldStarsRatio:
        self.ref_m=self.ref_mr[:self.nb_use]
        self.ref_x=self.ref_xr[:self.nb_use]
@@ -192,26 +193,18 @@ class StarMatch():
        self.field_x=self.field_xr[:int(self.nb_use*self.fieldStarsRatio)]
        self.field_y=self.field_yr[:int(self.nb_use*self.fieldStarsRatio)]       
     else:
-       if len_ref<len_field/self.fieldStarsRatio:
-          if len_ref>20:
-             len_ref=int(len_ref/2.)
-          self.ref_m=self.ref_mr[:len_ref]
-          self.ref_x=self.ref_xr[:len_ref]
-          self.ref_y=self.ref_yr[:len_ref]
-          self.field_m=self.field_mr[:int(len_ref*self.fieldStarsRatio)]
-          self.field_x=self.field_xr[:int(len_ref*self.fieldStarsRatio)]
-          self.field_y=self.field_yr[:int(len_ref*self.fieldStarsRatio)]           
-       else:
-          if len_field>20:
-             len_field=int(len_field/2.)
-          self.ref_m=self.ref_mr[:len_field]
-          self.ref_x=self.ref_xr[:len_field]
-          self.ref_y=self.ref_yr[:len_field]
-          self.field_m=self.field_mr[:int(len_field*self.fieldStarsRatio)]
-          self.field_x=self.field_xr[:int(len_field*self.fieldStarsRatio)]
-          self.field_y=self.field_yr[:int(len_field*self.fieldStarsRatio)]  
+       txt = "\n******* USING ALL STARS **********"
+       lenstr=min(len_ref,len_field,len_field*self.fieldStarsRatio)
+       if self.loud: self.mssg=self.mssg+txt
+       
+       self.ref_m=self.ref_mr[:lenstr]
+       self.ref_x=self.ref_xr[:lenstr]
+       self.ref_y=self.ref_yr[:lenstr]
+       self.field_m=self.field_mr[:lenstr]
+       self.field_x=self.field_xr[:lenstr]
+       self.field_y=self.field_yr[:lenstr]   
 
-    txt = "stars for local feature calculation (ref/field): " + str(len(self.ref_m)) + " / "+ str(len(self.field_m))
+    txt = "\nstars for local feature calculation (ref/field): " + str(len(self.ref_m)) + " / "+ str(len(self.field_m))
     if self.loud: self.mssg=self.mssg+txt
 
     ref_dx=max(self.ref_x)-min(self.ref_x)
@@ -239,6 +232,7 @@ class StarMatch():
        self.field_star_x=self.field_x[:int(len(self.field_m)*self.nbPCent_match)]
        self.field_star_y=self.field_y[:int(len(self.field_m)*self.nbPCent_match)]    
     else:  
+       print("\nALL IN ALL") 
        self.ref_star_m=self.ref_m
        self.ref_star_x=self.ref_x
        self.ref_star_y=self.ref_y
@@ -315,9 +309,6 @@ class StarMatch():
                s_max=s
                j_match=j
         if s_max>self.min_score:
-           #print(self.ref_star_x[i],self.ref_star_y[i],self.field_star_x[j_match],self.field_star_y[j_match])
-           #print("ref: ",self.ref_star_K[i])
-           #print("field: ",self.field_star_K[j_match])
            self.succesRate_projection=self.succesRate_projection+1
            self.ref_match_x.append(self.ref_star_x[i])
            self.ref_match_y.append(self.ref_star_y[i])  
@@ -358,8 +349,17 @@ def saveP2file(file_name_1,file_name_2,p_fr_x,p_fr_y,p_rf_x,p_rf_y):
     
 
 def coo_trans(x,y,px,py):
-    x=numpy.array(x)
-    y=numpy.array(y)
+    px=[float(p) for p in px]
+    py=[float(p) for p in py]
+    try: 
+       x=float(x)
+       y=float(y)
+    except TypeError:   
+       x=[float(f) for f in x]
+       y=[float(f) for f in y]
+       x=numpy.array(x)
+       y=numpy.array(y)
+
     xt=px[0]+px[1]*x+px[2]*y+px[3]*x*y+px[4]*x*x+px[5]*y*y
     yt=py[0]+py[1]*x+py[2]*y+py[3]*x*y+py[4]*x*x+py[5]*y*y
     return xt,yt
