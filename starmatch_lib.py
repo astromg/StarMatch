@@ -315,9 +315,9 @@ class StarMatch():
                s_max=s
                j_match=j
         if s_max>self.min_score:
-           print(self.ref_star_x[i],self.ref_star_y[i],self.field_star_x[j_match],self.field_star_y[j_match])
-           print("ref: ",self.ref_star_K[i])
-           print("field: ",self.field_star_K[j_match])
+           #print(self.ref_star_x[i],self.ref_star_y[i],self.field_star_x[j_match],self.field_star_y[j_match])
+           #print("ref: ",self.ref_star_K[i])
+           #print("field: ",self.field_star_K[j_match])
            self.succesRate_projection=self.succesRate_projection+1
            self.ref_match_x.append(self.ref_star_x[i])
            self.ref_match_y.append(self.ref_star_y[i])  
@@ -329,6 +329,33 @@ class StarMatch():
 
 
 #---------------------------------------------------------------
+
+def loadxytr(fname):
+    with open(fname) as plik:
+         for line in plik:
+             if "reference=" in line: ref_file = line.split('reference=')[1].split()[0]
+             if "field=" in line: field_file = line.split('field=')[1].split()[0]
+             if "F2R Px=" in line: p_fr_x=numpy.array(line.split("=")[1].split()).astype(numpy.float)
+             if "F2R Py=" in line: p_fr_y=numpy.array(line.split("=")[1].split()).astype(numpy.float)
+             if "R2F Px=" in line: p_rf_x=numpy.array(line.split("=")[1].split()).astype(numpy.float)
+             if "R2F Py=" in line: p_rf_y=numpy.array(line.split("=")[1].split()).astype(numpy.float)
+         return(ref_file,field_file,p_fr_x,p_fr_y,p_rf_x,p_rf_y)    
+
+def saveP2file(file_name_1,file_name_2,p_fr_x,p_fr_y,p_rf_x,p_rf_y):
+    
+    txt = "# reference="+file_name_1+" field="+file_name_2+"\n"
+    txt = txt+"# x' = px[0] + px[1] * x + px[2] * y + px[3] * x*y + px[4] * x*x + px[5] * y*y\n"
+    txt = txt+"# y' = py[0] + py[1] * x + py[2] * y + py[3] * x*y + py[4] * x*x + py[5] * y*y\n"
+    txt = txt+"# Field to Reference\n"
+    txt = txt+  "F2R Px=  " + "".join(str(tmp)+" " for tmp in p_fr_x)+"\n"
+    txt = txt+  "F2R Py=  " + "".join(str(tmp)+" " for tmp in p_fr_y)+"\n"
+    txt = txt+"# Reference to Field\n"
+    txt = txt+  "R2F Px=  " + "".join(str(tmp)+" " for tmp in p_rf_x)+"\n"
+    txt = txt+  "R2F Py=  " + "".join(str(tmp)+" " for tmp in p_rf_y)+"\n"   
+    mch_file = file_name_2.split(".")[0]+".xytr"
+    with open(mch_file, 'w') as f:
+         f.write(txt)
+    
 
 def coo_trans(x,y,px,py):
     x=numpy.array(x)

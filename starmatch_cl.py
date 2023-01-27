@@ -76,19 +76,12 @@ print("Y field to reference: ",sm.p_fr_y)
 print("X reference to field: ",sm.p_rf_x)
 print("Y reference to field: ",sm.p_rf_y)
 
-txt = "# reference="+file_name_1+" field="+file_name_2+"\n"
-txt = txt+"# x' = px[0] + px[1] * x + px[2] * y + px[3] * x*y + px[4] * x*x + px[5] * y*y\n"
-txt = txt+"# y' = py[0] + py[1] * x + py[2] * y + py[3] * x*y + py[4] * x*x + py[5] * y*y\n"
-txt = txt+"# Field to Reference\n"
-txt = txt+  "Px=  " + "".join(str(tmp)+" " for tmp in sm.p_fr_x)+"\n"
-txt = txt+  "Py=  " + "".join(str(tmp)+" " for tmp in sm.p_fr_y)+"\n"
-txt = txt+"# Reference to Field\n"
-txt = txt+  "Px=  " + "".join(str(tmp)+" " for tmp in sm.p_rf_x)+"\n"
-txt = txt+  "Py=  " + "".join(str(tmp)+" " for tmp in sm.p_rf_y)+"\n"
+saveP2file(file_name_1,file_name_2,sm.p_fr_x,sm.p_fr_y,sm.p_rf_x,sm.p_rf_y)
 
-mch_file = file_name_2.split(".")[0]+".xytr"
-with open(mch_file, 'w') as f:
-     f.write(txt)
+#tmp1,tmp2,p1,p2,p3,p4 = loadxytr(file_name_2.split(".")[0]+".xytr")
+#print(tmp1,tmp2,p1,p2,p3,p4)
+
+
 
 
 
